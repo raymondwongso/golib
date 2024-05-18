@@ -17,41 +17,34 @@ type WorkerManager struct {
 	workersPool chan *worker
 	tasksQueue  chan Task
 
-	errorHandler          errorHandler    // used when task return any error
-	resultHandler         resultHandler   // used when task return nil error
-	workerIDGeneratorFunc idGeneratorFunc // used by worker
+	errorHandler  errorHandler  // used when task return any error
+	resultHandler resultHandler // used when task return nil error
 
 	stopCh     chan bool
 	isStopping bool
 }
 
-type workerManagerOption func(*WorkerManager)
+type WorkerManagerOption func(*WorkerManager)
 
 // WithErrorHandler set specified error handler to the worker manager.
-func WithErrorHandler(errHandler errorHandler) workerManagerOption {
+func WithErrorHandler(errHandler errorHandler) WorkerManagerOption {
 	return func(wm *WorkerManager) {
 		wm.errorHandler = errHandler
 	}
 }
 
 // WithResultHandler set specified result handler to the worker manager.
-func WithResultHandler(resHandler resultHandler) workerManagerOption {
+func WithResultHandler(resHandler resultHandler) WorkerManagerOption {
 	return func(wm *WorkerManager) {
 		wm.resultHandler = resHandler
 	}
 }
 
-func WithWorkerIDGenerator(idGenFunc idGeneratorFunc) workerManagerOption {
-	return func(wm *WorkerManager) {
-		wm.workerIDGeneratorFunc = idGenFunc
-	}
-}
-
-// NewWorkerManager initialized new worker manager.
+// New initializes new worker manager.
 // There are no default value for maximum workers and tasks queue, caller needs to define it.
 // Outside of those two configuration, all default value is usable.
 // Any additional configuration can be specified via opts.
-func NewWorkerManager(maxWorkers, maxTasksQueue int, opts ...workerManagerOption) *WorkerManager {
+func New(maxWorkers, maxTasksQueue int, opts ...WorkerManagerOption) *WorkerManager {
 	wm := &WorkerManager{
 		workersPool: make(chan *worker, maxWorkers),
 		tasksQueue:  make(chan Task, maxTasksQueue),
@@ -100,9 +93,11 @@ Loop:
 	}
 
 	// drain the task queue
-	for range wm.tasksQueue {
-		if len(wm.tasksQueue) == 0 {
-			break
+	if len(wm.tasksQueue) > 0 {
+		for range wm.tasksQueue {
+			if len(wm.tasksQueue) == 0 {
+				break
+			}
 		}
 	}
 
@@ -131,9 +126,6 @@ func (wm *WorkerManager) workerOptions() []workerOption {
 	}
 	if wm.resultHandler != nil {
 		workerOpts = append(workerOpts, workerWithResultHandler(wm.resultHandler))
-	}
-	if wm.workerIDGeneratorFunc != nil {
-		workerOpts = append(workerOpts, workerWithIDGenerator(wm.workerIDGeneratorFunc))
 	}
 
 	return workerOpts

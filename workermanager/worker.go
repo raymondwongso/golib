@@ -10,9 +10,8 @@ type worker struct {
 	taskCh chan Task
 	stopCh chan bool
 
-	resultHandler   resultHandler   // typically passed from manager
-	errorHandler    errorHandler    // typically passed from manager
-	idGeneratorFunc idGeneratorFunc // generator for the ID if ID is empty string
+	resultHandler resultHandler // typically passed from manager
+	errorHandler  errorHandler  // typically passed from manager
 
 	doneCh chan bool
 }
@@ -31,29 +30,19 @@ func workerWithErrorHandler(errHandler errorHandler) workerOption {
 	}
 }
 
-func workerWithIDGenerator(idGenFn idGeneratorFunc) workerOption {
-	return func(w *worker) {
-		w.idGeneratorFunc = idGenFn
-	}
-}
-
 // NewWorker creates worker with various options.
 // These are available options:
 //   - resultHandler
 //   - errorHandler
-//   - idGeneratorFunc
 func NewWorker(opts ...workerOption) *worker {
 	w := &worker{
 		taskCh: make(chan Task, 1),
 		stopCh: make(chan bool, 1),
+		doneCh: make(chan bool, 1),
 	}
 
 	for _, opt := range opts {
 		opt(w)
-	}
-
-	if w.ID == "" && w.idGeneratorFunc != nil {
-		w.ID = w.idGeneratorFunc()
 	}
 
 	return w

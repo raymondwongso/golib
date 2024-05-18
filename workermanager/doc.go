@@ -6,9 +6,6 @@
 // [Example Worker Manager]: https://github.com/raymondwongso/golib/example/workermanager/main.go]
 package workermanager
 
-// define id generator func.
-type idGeneratorFunc func() string
-
 // define error handler func.
 type errorHandler func(error)
 

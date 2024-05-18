@@ -122,7 +122,7 @@ func Test_WithErrorWorkerManager_Start(t *testing.T) {
 		}()
 
 		for i := 0; i < targetError; i++ {
-			wm.AddTask(&testTask{isError: false})
+			wm.AddTask(&testTask{isError: true})
 		}
 
 		<-done

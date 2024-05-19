@@ -5,7 +5,8 @@ type Task interface {
 	Execute() (any, error)
 }
 
-type worker struct {
+// Worker defines singular worker that execute the task.
+type Worker struct {
 	ID     string `json:"id,omitempty"`
 	taskCh chan Task
 	stopCh chan bool
@@ -16,16 +17,16 @@ type worker struct {
 	doneCh chan bool
 }
 
-type workerOption func(*worker)
+type workerOption func(*Worker)
 
 func workerWithResultHandler(resHandler resultHandler) workerOption {
-	return func(w *worker) {
+	return func(w *Worker) {
 		w.resultHandler = resHandler
 	}
 }
 
 func workerWithErrorHandler(errHandler errorHandler) workerOption {
-	return func(w *worker) {
+	return func(w *Worker) {
 		w.errorHandler = errHandler
 	}
 }
@@ -34,8 +35,8 @@ func workerWithErrorHandler(errHandler errorHandler) workerOption {
 // These are available options:
 //   - resultHandler
 //   - errorHandler
-func NewWorker(opts ...workerOption) *worker {
-	w := &worker{
+func NewWorker(opts ...workerOption) *Worker {
+	w := &Worker{
 		taskCh: make(chan Task, 1),
 		stopCh: make(chan bool, 1),
 		doneCh: make(chan bool, 1),
@@ -49,7 +50,7 @@ func NewWorker(opts ...workerOption) *worker {
 }
 
 // Assign assigns task to the task channel of the worker.
-func (w *worker) Assign(task Task) {
+func (w *Worker) Assign(task Task) {
 	w.taskCh <- task
 }
 
@@ -57,9 +58,8 @@ func (w *worker) Assign(task Task) {
 // and then listen to the task channel.
 // worker will execute task received from the channel and will invoke
 // errorHandler or resultHandler if any.
-func (w *worker) Start(workersPool chan *worker) {
+func (w *Worker) Start(workersPool chan *Worker) {
 	go func() {
-
 	Loop:
 		for {
 			workersPool <- w
@@ -81,11 +81,11 @@ func (w *worker) Start(workersPool chan *worker) {
 }
 
 // DoneCh return doneChannel of the worker
-func (w *worker) DoneCh() chan bool {
+func (w *Worker) DoneCh() chan bool {
 	return w.doneCh
 }
 
 // Stop stop the worker and notify the stop channel.
-func (w *worker) Stop() {
+func (w *Worker) Stop() {
 	w.stopCh <- true
 }

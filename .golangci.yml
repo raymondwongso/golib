@@ -1,0 +1,45 @@
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - depguard
+    - dupl
+    - errcheck
+    - errorlint
+    - exhaustive
+    - funlen
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goimports
+    - gosec
+    - gosimple
+    - govet
+    - revive
+    - staticcheck
+    - stylecheck
+    - unparam
+    - unused
+    - whitespace
+issues:
+  exclude-rules:
+    - path: (.+)_test\.go
+      linters:
+        - bodyclose
+        - depguard
+        - dupl
+        - errcheck
+        - errorlint
+        - funlen
+        - gofmt
+        - goimports
+        - gosec
+        - gosimple
+        - govet
+        - revive
+        - unparam
+        - unused
+        - whitespace
+  exclude-dirs:
+    - /vendor

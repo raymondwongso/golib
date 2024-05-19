@@ -29,7 +29,7 @@ var (
 )
 
 func Test_New(t *testing.T) {
-	opts := []workermanager.WorkerManagerOption{
+	opts := []workermanager.Option{
 		workermanager.WithErrorHandler(testErrHandler),
 		workermanager.WithResultHandler(testResHandler),
 	}
@@ -64,7 +64,7 @@ func Test_PlainWorkerManager_Start(t *testing.T) {
 				wm.Stop()
 			}
 		}
-		opts = []workermanager.WorkerManagerOption{
+		opts = []workermanager.Option{
 			workermanager.WithResultHandler(resCounterHandler),
 		}
 	)
@@ -107,7 +107,7 @@ func Test_WithErrorWorkerManager_Start(t *testing.T) {
 				wm.Stop()
 			}
 		}
-		opts = []workermanager.WorkerManagerOption{
+		opts = []workermanager.Option{
 			workermanager.WithErrorHandler(errCounterHandler),
 		}
 	)

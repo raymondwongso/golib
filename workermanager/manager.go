@@ -11,10 +11,8 @@ package workermanager
 //
 // The manager controls the lifecycle of its workers. It will stop all workers when the manager is being stopped.
 // It will also drain any queued tasks.
-//
-// worker struct is not exposed to the caller by design.
 type WorkerManager struct {
-	workersPool chan *worker
+	workersPool chan *Worker
 	tasksQueue  chan Task
 
 	errorHandler  errorHandler  // used when task return any error
@@ -24,17 +22,18 @@ type WorkerManager struct {
 	isStopping bool
 }
 
-type WorkerManagerOption func(*WorkerManager)
+// Option defines optional function to configure worker manager
+type Option func(*WorkerManager)
 
 // WithErrorHandler set specified error handler to the worker manager.
-func WithErrorHandler(errHandler errorHandler) WorkerManagerOption {
+func WithErrorHandler(errHandler errorHandler) Option {
 	return func(wm *WorkerManager) {
 		wm.errorHandler = errHandler
 	}
 }
 
 // WithResultHandler set specified result handler to the worker manager.
-func WithResultHandler(resHandler resultHandler) WorkerManagerOption {
+func WithResultHandler(resHandler resultHandler) Option {
 	return func(wm *WorkerManager) {
 		wm.resultHandler = resHandler
 	}
@@ -44,9 +43,9 @@ func WithResultHandler(resHandler resultHandler) WorkerManagerOption {
 // There are no default value for maximum workers and tasks queue, caller needs to define it.
 // Outside of those two configuration, all default value is usable.
 // Any additional configuration can be specified via opts.
-func New(maxWorkers, maxTasksQueue int, opts ...WorkerManagerOption) *WorkerManager {
+func New(maxWorkers, maxTasksQueue int, opts ...Option) *WorkerManager {
 	wm := &WorkerManager{
-		workersPool: make(chan *worker, maxWorkers),
+		workersPool: make(chan *Worker, maxWorkers),
 		tasksQueue:  make(chan Task, maxTasksQueue),
 		stopCh:      make(chan bool, 1),
 	}
@@ -62,7 +61,7 @@ func New(maxWorkers, maxTasksQueue int, opts ...WorkerManagerOption) *WorkerMana
 // it will spawn worker(s) as much as the capacity of the workers pool, and start them all.
 // Start will block until caller stop the manager using Stop().
 func (wm *WorkerManager) Start() {
-	workers := make([]*worker, cap(wm.workersPool))
+	workers := make([]*Worker, cap(wm.workersPool))
 	workerOpts := wm.workerOptions()
 	for i := 0; i < len(workers); i++ {
 		workers[i] = NewWorker(workerOpts...)

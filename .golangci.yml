@@ -6,13 +6,19 @@ linters:
     - dupl
     - errcheck
     - errorlint
+    - exhaustive
     - funlen
+    - goconst
+    - gocritic
+    - gocyclo
     - gofmt
     - goimports
     - gosec
     - gosimple
     - govet
     - revive
+    - staticcheck
+    - stylecheck
     - unparam
     - unused
     - whitespace

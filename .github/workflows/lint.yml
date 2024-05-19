@@ -17,7 +17,12 @@ jobs:
     - uses: actions/setup-go@v5
       with:
         go-version-file: 'go.mod'
-    - name: Lint
-      uses: golangci/golangci-lint-action@v6
+    - uses: golangci/golangci-lint-action@v6
       with:
         version: v1.57.2
+        # Github Action doesn't provide any way to specified which go modules to run to if you have monorepo.
+        # this trick the golangci-lint to not running the linter.
+        # then we will manually lint using below step.
+        args: --help
+    - name: Lint
+      run: make lint

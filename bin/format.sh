@@ -6,6 +6,10 @@ for dir in $(find . -maxdepth 1 -type d); do
   dirname=$(basename "$dir")
   if [ "$dirname" != "." ] && [[ "$dirname" != .* ]] && [[ "$dirname" != bin ]] && [[ "$dirname" != dev ]]; then
     cd "$dirname"
-    golangci-lint run ./...
+
+    for file in $(find . -type f -name "*.go" -not -path "*vendor/*"); do
+      goimports -w $file
+      gofmt -s -w $file
+    done
   fi
 done

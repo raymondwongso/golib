@@ -2,6 +2,10 @@
 dev:
 	bin/dev.sh
 
+.PHONY: format
+format:
+	bin/format.sh
+
 .PHONY: lint
 lint:
 	bin/lint.sh
